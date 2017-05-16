@@ -1,10 +1,38 @@
 #include <opencv2\imgproc\imgproc.hpp>
 #include <Windows.h>
 #include <CommCtrl.h>
+#include <stdio.h>
 using namespace cv;
 
 #define EULER 2.7182818
 #define PI 3.1416
+
+class VideoImages {
+public:
+	Mat frame;
+	int numFrame;
+	VideoImages(){}
+};
+
+class VideoInfo {
+public:
+	VideoImages *frames;
+	int fps;
+	float framerate;
+	int width;
+	int heigth;
+	int filterCount;
+	int codec;
+	VideoInfo(int fps, float framerate, int width, int heigth, int codec) {
+		this->frames = new VideoImages[fps];
+		this->fps = fps;
+		this->framerate = framerate;
+		this->width = width;
+		this->heigth = heigth;
+		this->codec = codec;
+		this->filterCount = 0;
+	}
+};
 
 class AjuestesColor{
 public:
@@ -18,12 +46,12 @@ public:
 };
 
 class Mascara:private AjuestesColor{
+public:
 	float *mask;
 	int size;
 	float sum;
 	int limitus;
 	int x, y;
-public:
 	void printValues(){
 		char *a;
 		for(int i = 0; i<size; i++){
@@ -49,8 +77,9 @@ public:
 		SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_SETRANGE, NULL, MAKELPARAM(0, img->rows));
 		Mascara *m = new Mascara(size);
 		int *lim = new int;
-		for (unsigned short y = limit; y < (img->rows - limit); y++) {
-			for (unsigned short x = limit; x < (img->cols - limit); x++) {
+		int x, y;
+		for (y = limit; y < (img->rows - limit); y++) {
+			for (x = limit; x < (img->cols - limit); x++) {
 				result.at<Vec3b>(y, x)[0] = saturate(abs(multiply(lim, getBitmapArea(lim, m, img, x, y, size, 1)).getSigma() / sum));
 				result.at<Vec3b>(y, x)[1] = saturate(abs(multiply(lim, getBitmapArea(lim, m, img, x, y, size, 2)).getSigma() / sum));
 				result.at<Vec3b>(y, x)[2] = saturate(abs(multiply(lim, getBitmapArea(lim, m, img, x, y, size, 3)).getSigma() / sum));
@@ -105,8 +134,7 @@ public:
 		else if (y == 1)
 			y = 2;
 
-		float resul = mask[y * size + x];
-		return resul;
+		return mask[y * size + x];
 	}
 	Mascara *getBitmapArea(int *limite, Mascara *m, Mat *data, int px, int py, int tamaño, int canal) {
 		m = new Mascara(tamaño);
@@ -127,17 +155,14 @@ public:
 				}
 		return m;
 	}
-
 	int getSize() {
 		return size * size;
 	}
-
 	int getMidValue() {
 		float *m = mask;
 		std::sort(m, m + (size*size));
 		return (int)m[((size * size - 1) / 2) + 1];
 	}
-
 	int getAncho() {
 		return size;
 	}
@@ -151,22 +176,24 @@ public:
 
 class Filter:private AjuestesColor{
 	HWND hWnd;
+	int x, y, l;
+	float r, g, b;
+	Mat img;
 public:
 	void setHWND(HWND hWnd){
 		this->hWnd = hWnd;
 	}
 	Mat Luminancia(Mat image, HWND hWnd){
-		Mat img = image;
-		int r, g, b;
+		img = image;
 		SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_SETPOS, 0, NULL);
 		SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_SETRANGE, NULL, MAKELPARAM(0, image.rows));
-		for (int y = 0; y < img.rows; y++) {
-			for (int x = 0; x < img.cols; x++) {
+		for (y = 0; y < img.rows; y++) {
+			for (x = 0; x < img.cols; x++) {
 				b = saturate(img.at<Vec3b>(y, x)[0]);
 				g = saturate(img.at<Vec3b>(y, x)[1]);
 				r = saturate(img.at<Vec3b>(y, x)[2]);
 				
-				int l = (0.2126*r + 0.7152*g + 0.0722*b);
+				l = (0.2126*r + 0.7152*g + 0.0722*b);
 
 				img.at<Vec3b>(y, x)[0] = l;
 				img.at<Vec3b>(y, x)[1] = l;
@@ -177,17 +204,16 @@ public:
 		return img;
 	}
 	Mat Average(Mat image, HWND hWnd){
-		Mat img = image;
-		int r, g, b;
+		img = image;
 		SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_SETPOS, 0, NULL);
 		SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_SETRANGE, NULL, MAKELPARAM(0, image.rows));
-		for (int y = 0; y < img.rows; y++) {
-			for (int x = 0; x < img.cols; x++) {
+		for (y = 0; y < img.rows; y++) {
+			for (x = 0; x < img.cols; x++) {
 				b = saturate(img.at<Vec3b>(y, x)[0]);
 				g = saturate(img.at<Vec3b>(y, x)[1]);
 				r = saturate(img.at<Vec3b>(y, x)[2]);
 
-				int l = saturate((b + g + r) / 3);
+				l = saturate((b + g + r) / 3);
 
 				img.at<Vec3b>(y, x)[0] = l;
 				img.at<Vec3b>(y, x)[1] = l;
@@ -198,17 +224,16 @@ public:
 		return img;
 	}
 	Mat Luminosidad(Mat image, HWND hWnd) {
-		Mat img = image;
-		int r, g, b;
+		img = image;
 		SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_SETPOS, 0, NULL);
 		SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_SETRANGE, NULL, MAKELPARAM(0, image.rows));
-		for (int y = 0; y < img.rows; y++) {
-			for (int x = 0; x < img.cols; x++) {
+		for (y = 0; y < img.rows; y++) {
+			for (x = 0; x < img.cols; x++) {
 				b = saturate(img.at<Vec3b>(y, x)[0]);
 				g = saturate(img.at<Vec3b>(y, x)[1]);
 				r = saturate(img.at<Vec3b>(y, x)[2]);
 
-				int l = (max(r, g, b) + min(r, g, b)) / 2;
+				l = (max(r, g, b) + min(r, g, b)) / 2;
 
 				img.at<Vec3b>(y, x)[0] = l;
 				img.at<Vec3b>(y, x)[1] = l;
@@ -219,17 +244,16 @@ public:
 		return img;
 	}
 	Mat Sepia(Mat image, HWND hWnd) {
-		Mat img = image;
-		float r, g, b;
+		img = image;
 		SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_SETPOS, 0, NULL);
 		SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_SETRANGE, NULL, MAKELPARAM(0, image.rows));
-		for (int y = 0; y < img.rows; y++) {
-			for (int x = 0; x < img.cols; x++) {
+		for (y = 0; y < img.rows; y++) {
+			for (x = 0; x < img.cols; x++) {
 				b = saturate(img.at<Vec3b>(y, x)[0]);
 				g = saturate(img.at<Vec3b>(y, x)[1]);
 				r = saturate(img.at<Vec3b>(y, x)[2]);
 
-				int l = saturate((b + g + r) / 3);
+				l = saturate((b + g + r) / 3);
 
 				img.at<Vec3b>(y, x)[2] = saturate((r * 0.393f) + (g * 0.769f) + (b * 0.189f));
 				img.at<Vec3b>(y, x)[1] = saturate((r * 0.349f) + (g * 0.686f) + (b * 0.168f));
@@ -240,12 +264,11 @@ public:
 		return img;
 	}
 	Mat Negativo(Mat image, HWND hWnd) {
-		Mat img = image;
-		float r, g, b;
+		img = image;
 		SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_SETPOS, 0, NULL);
 		SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_SETRANGE, NULL, MAKELPARAM(0, image.rows));
-		for (int y = 0; y < img.rows; y++) {
-			for (int x = 0; x < img.cols; x++) {
+		for (y = 0; y < img.rows; y++) {
+			for (x = 0; x < img.cols; x++) {
 				b = saturate(img.at<Vec3b>(y, x)[0]);
 				g = saturate(img.at<Vec3b>(y, x)[1]);
 				r = saturate(img.at<Vec3b>(y, x)[2]);
@@ -259,13 +282,12 @@ public:
 		return img;
 	}
 	Mat Binario(Mat image, int threshold, HWND hWnd) {
-		Mat img = image;
+		img = image;
 		Mat result(image);
-		float r, g, b;
 		SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_SETPOS, 0, NULL);
 		SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_SETRANGE, NULL, MAKELPARAM(0, image.rows));
-		for (int y = 0; y < img.rows; y++) {
-			for (int x = 0; x < img.cols; x++) {
+		for (y = 0; y < img.rows; y++) {
+			for (x = 0; x < img.cols; x++) {
 				if(saturate(img.at<Vec3b>(y, x)[0]) < threshold){
 					result.at<Vec3b>(y, x)[2] = 0;
 					result.at<Vec3b>(y, x)[1] = 0;
@@ -447,6 +469,219 @@ public:
 
 		return mask->ApplyMask(image, hWnd);
 	}
+
+	void LuminanciaVideo(VideoInfo *vid, HWND hWnd) {
+		SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_SETPOS, 0, NULL);
+		SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_SETRANGE, NULL, MAKELPARAM(0, vid->fps));
+		for (int i = 0; i < vid->fps; i++) {
+			vid->frames[i].frame = Luminancia(vid->frames[i].frame, NULL);
+			SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_STEPIT, NULL, NULL);
+		}
+	}
+	void AverageVideo(VideoInfo *vid, HWND hWnd) {
+		SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_SETPOS, 0, NULL);
+		SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_SETRANGE, NULL, MAKELPARAM(0, vid->fps));
+		for (int i = 0; i < vid->fps; i++) {
+			vid->frames[i].frame = Average(vid->frames[i].frame, NULL);
+			SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_STEPIT, NULL, NULL);
+		}
+	}
+	void LuminosidadVideo(VideoInfo *vid, HWND hWnd) {
+		SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_SETPOS, 0, NULL);
+		SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_SETRANGE, NULL, MAKELPARAM(0, vid->fps));
+		for (int i = 0; i < vid->fps; i++) {
+			vid->frames[i].frame = Luminosidad(vid->frames[i].frame, NULL);
+			SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_STEPIT, NULL, NULL);
+		}
+	}
+	void SepiaVideo(VideoInfo *vid, HWND hWnd) {
+		SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_SETPOS, 0, NULL);
+		SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_SETRANGE, NULL, MAKELPARAM(0, vid->fps));
+		for (int i = 0; i < vid->fps; i++) {
+			vid->frames[i].frame = Sepia(vid->frames[i].frame, NULL);
+			SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_STEPIT, NULL, NULL);
+		}
+	}
+	void NegativoVideo(VideoInfo *vid, HWND hWnd) {
+		SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_SETPOS, 0, NULL);
+		SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_SETRANGE, NULL, MAKELPARAM(0, vid->fps));
+		for (int i = 0; i < vid->fps; i++) {
+			vid->frames[i].frame = Negativo(vid->frames[i].frame, NULL);
+			SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_STEPIT, NULL, NULL);
+		}
+	}
+	void BinarioVideo(VideoInfo *vid, HWND hWnd) {
+		SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_SETPOS, 0, NULL);
+		SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_SETRANGE, NULL, MAKELPARAM(0, vid->fps));
+		for (int i = 0; i < vid->fps; i++) {
+			vid->frames[i].frame = Binario(vid->frames[i].frame, 127, NULL);
+			SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_STEPIT, NULL, NULL);
+		}
+	}
+
+	void MediaVideo(VideoInfo *vid, HWND hWnd) {
+		SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_SETPOS, 0, NULL);
+		SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_SETRANGE, NULL, MAKELPARAM(0, vid->fps));
+		for (int i = 0; i < vid->fps; i++) {
+			Media(&vid->frames[i].frame);
+			SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_STEPIT, NULL, NULL);
+		}
+	}
+	void MediaPonderadaVideo(VideoInfo *vid, HWND hWnd) {
+		SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_SETPOS, 0, NULL);
+		SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_SETRANGE, NULL, MAKELPARAM(0, vid->fps));
+		for (int i = 0; i < vid->fps; i++) {
+			MediaPonderada(&vid->frames[i].frame);
+			SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_STEPIT, NULL, NULL);
+		}
+	}
+	void PasoBajoVideo(VideoInfo *vid, HWND hWnd) {
+		SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_SETPOS, 0, NULL);
+		SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_SETRANGE, NULL, MAKELPARAM(0, vid->fps));
+		for (int i = 0; i < vid->fps; i++) {
+			PasoBajo(&vid->frames[i].frame);
+			SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_STEPIT, NULL, NULL);
+		}
+	}
+	void SustraccionMediaVideo(VideoInfo *vid, HWND hWnd) {
+		SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_SETPOS, 0, NULL);
+		SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_SETRANGE, NULL, MAKELPARAM(0, vid->fps));
+		for (int i = 0; i < vid->fps; i++) {
+			SustraccionMedia(&vid->frames[i].frame);
+			SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_STEPIT, NULL, NULL);
+		}
+	}
+	void LaplacianoVideo(VideoInfo *vid, HWND hWnd) {
+		SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_SETPOS, 0, NULL);
+		SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_SETRANGE, NULL, MAKELPARAM(0, vid->fps));
+		for (int i = 0; i < vid->fps; i++) {
+			Laplaciano(&vid->frames[i].frame);
+			SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_STEPIT, NULL, NULL);
+		}
+	}
+	void MenosLaplacianoVideo(VideoInfo *vid, HWND hWnd) {
+		SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_SETPOS, 0, NULL);
+		SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_SETRANGE, NULL, MAKELPARAM(0, vid->fps));
+		for (int i = 0; i < vid->fps; i++) {
+			MenosLaplaciano(&vid->frames[i].frame);
+			SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_STEPIT, NULL, NULL);
+		}
+	}
+	void GaussianoVideo(VideoInfo *vid, HWND hWnd) {
+		SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_SETPOS, 0, NULL);
+		SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_SETRANGE, NULL, MAKELPARAM(0, vid->fps));
+		for (int i = 0; i < vid->fps; i++) {
+			Gaussiano(&vid->frames[i].frame);
+			SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_STEPIT, NULL, NULL);
+		}
+	}
+	void SobelVideo(VideoInfo *vid, HWND hWnd) {
+		SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_SETPOS, 0, NULL);
+		SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_SETRANGE, NULL, MAKELPARAM(0, vid->fps));
+		for (int i = 0; i < vid->fps; i++) {
+			Sobel(&vid->frames[i].frame);
+			SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_STEPIT, NULL, NULL);
+		}
+	}
+	void CorreccionLogaritmicaVideo(VideoInfo *vid, HWND hWnd) {
+		SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_SETPOS, 0, NULL);
+		SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_SETRANGE, NULL, MAKELPARAM(0, vid->fps));
+		for (int i = 0; i < vid->fps; i++) {
+			CorreccionLogaritmica(&vid->frames[i].frame);
+			SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_STEPIT, NULL, NULL);
+		}
+	}
+	void PotenciaVideo(VideoInfo *vid, HWND hWnd) {
+		SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_SETPOS, 0, NULL);
+		SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_SETRANGE, NULL, MAKELPARAM(0, vid->fps));
+		for (int i = 0; i < vid->fps; i++) {
+			Potencia(&vid->frames[i].frame);
+			SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_STEPIT, NULL, NULL);
+		}
+	}
+	void SharpenVideo(VideoInfo *vid, HWND hWnd) {
+		SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_SETPOS, 0, NULL);
+		SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_SETRANGE, NULL, MAKELPARAM(0, vid->fps));
+		for (int i = 0; i < vid->fps; i++) {
+			Sharpen(&vid->frames[i].frame);
+			SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_STEPIT, NULL, NULL);
+		}
+	}
+};
+
+class Histograma:private AjuestesColor{
+public:
+	int *histograma[3];
+	Histograma(){
+		histograma[0] = new int[256];
+		histograma[1] = new int[256];
+		histograma[2] = new int[256];
+		for(int i = 0; i < 256; i++){
+			histograma[0][i] = 0;
+			histograma[1][i] = 0;
+			histograma[2][i] = 0;
+		}
+	}
+	void plotHistogram(Mat img){
+		Mat dst;
+		/// Separate the image in 3 places ( B, G and R )
+		std::vector<Mat> bgr_planes;
+		split(img, bgr_planes);
+
+		/// Establish the number of bins
+		int histSize = 256;
+
+		/// Set the ranges ( for B,G,R) )
+		float range[] = { 0, 256 };
+		const float* histRange = { range };
+
+		bool uniform = true; bool accumulate = false;
+
+		Mat b_hist, g_hist, r_hist;
+
+		/// Compute the histograms:
+		calcHist(&bgr_planes[0], 1, 0, Mat(), b_hist, 1, &histSize, &histRange, uniform, accumulate);
+		calcHist(&bgr_planes[1], 1, 0, Mat(), g_hist, 1, &histSize, &histRange, uniform, accumulate);
+		calcHist(&bgr_planes[2], 1, 0, Mat(), r_hist, 1, &histSize, &histRange, uniform, accumulate);
+
+		// Draw the histograms for B, G and R
+		int hist_w = 512; int hist_h = 400;
+		int bin_w = cvRound((double)hist_w / histSize);
+
+		Mat histImage(hist_h, hist_w, CV_8UC3, Scalar(0, 0, 0));
+
+		/// Normalize the result to [ 0, histImage.rows ]
+		normalize(b_hist, b_hist, 0, histImage.rows, NORM_MINMAX, -1, Mat());
+		normalize(g_hist, g_hist, 0, histImage.rows, NORM_MINMAX, -1, Mat());
+		normalize(r_hist, r_hist, 0, histImage.rows, NORM_MINMAX, -1, Mat());
+
+		/// Draw for each channel
+		for (int i = 1; i < histSize; i++) {
+			line(histImage, Point(bin_w*(i - 1), hist_h - cvRound(b_hist.at<float>(i - 1))),
+				Point(bin_w*(i), hist_h - cvRound(b_hist.at<float>(i))),
+				Scalar(255, 0, 0), 2, 8, 0);
+			line(histImage, Point(bin_w*(i - 1), hist_h - cvRound(g_hist.at<float>(i - 1))),
+				Point(bin_w*(i), hist_h - cvRound(g_hist.at<float>(i))),
+				Scalar(0, 255, 0), 2, 8, 0);
+			line(histImage, Point(bin_w*(i - 1), hist_h - cvRound(r_hist.at<float>(i - 1))),
+				Point(bin_w*(i), hist_h - cvRound(r_hist.at<float>(i))),
+				Scalar(0, 0, 255), 2, 8, 0);
+		}
+
+		/// Display
+		namedWindow("calcHist Demo", CV_WINDOW_AUTOSIZE);
+		imshow("calcHist Demo", histImage);
+	}
+	void createHistogram(Mat img){
+		int x, y;
+		for (y = 0; y < img.rows; y++) {
+			for (x = 0; x < img.cols; x++) {
+				histograma[0][img.at<Vec3b>(y, x)[0]]++;
+				histograma[1][img.at<Vec3b>(y, x)[1]]++;
+				histograma[2][img.at<Vec3b>(y, x)[2]]++;
+			}
+		}
+	}
 };
 
 struct Imagen{
@@ -459,19 +694,26 @@ struct Imagen{
 	}
 };
 
-class Lista{
+class Lista {
 public:
 	Imagen *inicio;
 	Imagen *current;
 	int count = 0;
+	int curr = 1;
 	Lista(){
 		inicio = NULL;
 	}
 	void backFilter(){
-		current = current->ant;
+		if (curr > 1) {
+			current = current->ant;
+			curr--;
+		}
 	}
 	void forwardFilter() {
-		current = current->sig;
+		if (curr < count) {
+			current = current->sig;
+			curr++;
+		}
 	}
 	Mat getOriginal(){
 		return inicio->imagen;
@@ -482,11 +724,10 @@ public:
 	Mat getCurrent(){
 		return current->imagen;
 	}
-	void setCurrent(Mat img){
+	void AddNew(Mat img){
 		img.copyTo(current->imagen);
-	}
-	void AddNew(){
-		Add(new Imagen(current->imagen));
+		Add(new Imagen(img));
+		curr++;
 	}
 	void Add(Imagen *img) {
 		if (inicio == NULL) {
@@ -512,14 +753,14 @@ public:
 	}
 };
 
-String getFileName() {
+String getFileNameImage() {
 	OPENFILENAME ofn;
 	char filename[MAX_PATH];
 	ZeroMemory(&ofn, sizeof(ofn));
 	ZeroMemory(&filename, sizeof(filename));
 	ofn.lStructSize = sizeof(ofn);
 	ofn.hwndOwner = NULL;
-	ofn.lpstrFilter = "Imagen JPG\0*.jpg\0Imagen BMP\0*.bmp\0Todos los archivos\0*.*";
+	ofn.lpstrFilter = "Imagen JPG\0*.jpg\0Todos los archivos\0*.*";
 	ofn.lpstrFile = filename;
 	ofn.nMaxFile = MAX_PATH;
 	ofn.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
@@ -528,22 +769,40 @@ String getFileName() {
 	return "";
 }
 
+String getFileNameVideo() {
+	OPENFILENAME ofn;
+	char filename[MAX_PATH];
+	ZeroMemory(&ofn, sizeof(ofn));
+	ZeroMemory(&filename, sizeof(filename));
+	ofn.lStructSize = sizeof(ofn);
+	ofn.hwndOwner = NULL;
+	ofn.lpstrFilter = "Video Mp4\0*.mp4\0Todos los archivos\0*.*";
+	ofn.lpstrFile = filename;
+	ofn.nMaxFile = MAX_PATH;
+	ofn.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
+	if (GetOpenFileName(&ofn))
+		return filename;
+	return "";
+}
 
-String SaveFile() {
+String SaveFile(LPCSTR ext) {
 	OPENFILENAME ofn;
 	char szFileName[MAX_PATH] = "";
 	ZeroMemory(&ofn, sizeof(ofn));
 
 	ofn.lStructSize = sizeof(ofn);
 	ofn.hwndOwner = NULL;
-	ofn.lpstrFilter = "JPG Image (*.jpg)\0*.txt\0All Files (*.*)\0*.*\0";
+	if(!strcmp(ext, "jpg"))
+		ofn.lpstrFilter = "JPG Image (*.jpg)\0";
+	if (!strcmp(ext, "avi"))
+		ofn.lpstrFilter = "Mp4 Video (*.avi)\0";
 	ofn.lpstrFile = szFileName;
 	ofn.nMaxFile = MAX_PATH;
 	ofn.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
-	ofn.lpstrDefExt = "jpg";
+	ofn.lpstrDefExt = ext;
 
 	GetSaveFileName(&ofn);
-	return szFileName;
+	return (String)szFileName;
 }
 
 Mat GetSquareImage(const Mat& img, int target_width) {
@@ -573,8 +832,62 @@ Mat GetSquareImage(const Mat& img, int target_width) {
 	return square;
 }
 
-void updateFilterCount(HWND hWnd, Lista *imageList){
+void updateFilterCount(HWND hWnd, int value){
 	char count[5];
-	_itoa(imageList->count - 1, count, 10);
+	_itoa(value, count, 10);
 	SetWindowText(GetDlgItem(hWnd, FILTER_COUNT), count);
+}
+
+void playVideo(VideoInfo *vid){
+	namedWindow("A_good_name", CV_WINDOW_AUTOSIZE);
+	Mat frame;
+	for (int i = 0; i < vid->fps; i++) {
+		imshow("A_good_name", vid->frames[i].frame);
+		if (waitKey(30) == 27)
+			break;
+	}
+}
+
+void playVideo(VideoCapture *vid) {
+	float fps = vid->get(CV_CAP_PROP_FRAME_COUNT);
+	namedWindow("A_good_name", CV_WINDOW_AUTOSIZE);
+	Mat frame;
+	for (int i = 0; i < fps; i++) {
+		vid->set(CV_CAP_PROP_POS_FRAMES, i);
+		vid->read(frame);
+		imshow("A_good_name", frame);
+		if (waitKey(30) == 27)
+			break;
+	}
+}
+
+VideoInfo *loadVideo(VideoCapture *vid, HWND hWnd) {
+	float fps = vid->get(CV_CAP_PROP_FRAME_COUNT);
+	float framerate = vid->get(CV_CAP_PROP_FPS);
+	float heigth = vid->get(CV_CAP_PROP_FRAME_HEIGHT);
+	float width = vid->get(CV_CAP_PROP_FRAME_WIDTH);
+	float codec = vid->get(CV_CAP_PROP_FOURCC);
+	VideoInfo *cap = new VideoInfo(fps, framerate, heigth, width, codec);
+	SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_SETPOS, 0, NULL);
+	SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_SETRANGE, NULL, MAKELPARAM(0, fps));
+	for (int i = 0; i < fps; i++) {
+		vid->set(CV_CAP_PROP_POS_FRAMES, i);
+		vid->read(cap->frames[i].frame);
+		cap->frames[i].numFrame = i;
+		SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_STEPIT, NULL, NULL);
+	}
+	return cap;
+}
+
+void saveVideoFile(VideoInfo *vid, HWND hWnd) {
+	String savePath(SaveFile("avi"));
+	VideoWriter vw;
+	vw.open(savePath, CV_FOURCC('W','M','V', '2'), vid->framerate, Size(vid->heigth, vid->width));
+	SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_SETPOS, 0, NULL);
+	SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_SETRANGE, NULL, MAKELPARAM(0, vid->fps));
+	if(vw.isOpened())
+		for (int i = 0; i < vid->fps; i++) {
+			vw.write(vid->frames[i].frame);
+			SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_STEPIT, NULL, NULL);
+		}
 }
