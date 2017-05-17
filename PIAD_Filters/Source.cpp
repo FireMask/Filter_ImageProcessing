@@ -17,11 +17,23 @@ Filter flt;
 VideoCapture vidOriginal;
 VideoInfo *newvideo;
 Histograma *hist;
+VideoCapture *cam;
+
+enum VideoFilter { BlancoYNegro, Luminosidad, Promedio, Luminancia, Sepia, Binario, Negativo };
+
+HWND timer1;
+
+#define ID_TIMER1 1
+
+void stopCamera(HWND);
 
 char* source_window = "Source image";
 bool imageReady = false;
 bool videoReady = false;
 int defaultSize = 720;
+int filtroCam = -1;
+
+bool camaraActiva = false;
 
 char filtros[13][30] = { "Media", "Media Ponderada", "Mediana", "Blur", "Gaussiano", "Lapaciano", "Menos Laplaciano", "Sobel", "Corrección Logaritmica", "Potencia", "Sharpen", "Paso Bajo", "Sustracción de la Media" };
 char efectos[7][30] = { "Blanco y Negro", "Luminosidad", "Promedio", "Luminancia", "Sepia", "Binario", "Negativo" };
@@ -40,8 +52,53 @@ BOOL CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			SendMessage(GetDlgItem(hWnd, EFFECT_BOX), CB_ADDSTRING, NULL, (LPARAM)efectos[i]);
 		break;
 	}
+	case WM_TIMER:{
+		switch(wParam){
+			case ID_TIMER1:
+				Mat frame;
+				cam->read(frame);
+				switch(filtroCam){
+					case BlancoYNegro:
+						Filter().Binario(frame, 100, NULL);
+						break;
+					case Luminosidad:
+						Filter().Luminosidad(frame, NULL);
+						break;
+					case Promedio:
+						Filter().Average(frame, NULL);
+						break;
+					case Luminancia:
+						Filter().Luminancia(frame, NULL);
+						break;
+					case Sepia:
+						Filter().Sepia(frame, NULL);
+						break;
+					case Binario:
+						Filter().Binario(frame, 85, NULL);
+						break;
+					case Negativo:
+						Filter().Negativo(frame, NULL);
+						break;
+					}
+				namedWindow("VideoStream", WINDOW_AUTOSIZE);
+				imshow("VideoStream", frame);
+				break;
+		}
+		break;
+	}
 	case WM_COMMAND:{
 		switch(wParam){
+			case CAMERA:{
+				if (!camaraActiva) {
+					cam = new VideoCapture(0);
+					SetTimer(hWnd, ID_TIMER1, 1, NULL);
+					camaraActiva = true;
+					imageReady = false;
+					videoReady = false;
+				}else
+					stopCamera(hWnd);
+				break;
+			}
 			case SAVE_FILE:{
 				if (imageReady) {
 					if (imageList->count > 0) {
@@ -65,6 +122,8 @@ BOOL CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					imshow(source_window, GetSquareImage(imageList->getCurrent(), defaultSize));
 					imageReady = true;
 					videoReady = false;
+					camaraActiva = false;
+					stopCamera(hWnd);
 				}
 				break;
 			}
@@ -76,13 +135,17 @@ BOOL CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 						newvideo = loadVideo(&vidOriginal, hWnd);
 						videoReady = true;
 						imageReady = false;
+						camaraActiva = false;
+						stopCamera(hWnd);
 					}
 				}
 				break;
 			}
 			case HISTO:
-				hist->createHistogram(imageList->getCurrent());
-				hist->plotHistogram(imageList->getCurrent());
+				if (imageReady) {
+					hist->createHistogram(imageList->getCurrent());
+					hist->plotHistogram(imageList->getCurrent());
+				}
 				break;
 			case PLAY_VIDEO:{
 				if(videoReady)
@@ -125,12 +188,12 @@ BOOL CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 								imshow(source_window, GetSquareImage(imageList->getCurrent(), defaultSize));
 								break;
 							case 2: //Mediana
-
+								imageList->AddNew(flt.Media(&imageList->getPrevCurrent()));
+								imshow(source_window, GetSquareImage(imageList->getCurrent(), defaultSize));
 								break;
 							case 3: //Blur
-								//imageList->AddNew();
-								//blur(imageList->getPrevCurrent(), imageList->getCurrent(), Size(5, 5));
-								//imshow(source_window, GetSquareImage(imageList->getCurrent(), defaultSize));
+								imageList->AddNew(flt.Media(&imageList->getPrevCurrent()));
+								imshow(source_window, GetSquareImage(imageList->getCurrent(), defaultSize));
 								break;
 							case 4: //Gaussiano
 								imageList->AddNew(flt.Gaussiano(&imageList->getPrevCurrent(), .85));
@@ -179,10 +242,10 @@ BOOL CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 							Filter().MediaPonderadaVideo(newvideo, hWnd);
 							break;
 						case 2: //Mediana
-							
+							Filter().MediaVideo(newvideo, hWnd);
 							break;
 						case 3: //Blur
-							
+							Filter().MediaVideo(newvideo, hWnd);
 							break;
 						case 4: //Gaussiano
 							Filter().GaussianoVideo(newvideo, hWnd);
@@ -222,57 +285,69 @@ BOOL CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			}
 			case APPLY_EFFECT: {			
 				int value = SendMessage(GetDlgItem(hWnd, EFFECT_BOX), CB_GETCURSEL, NULL, NULL);
-				if (value != -1 && imageReady || videoReady) {
+				if (value != -1 && imageReady || videoReady || camaraActiva) {
 					switch (value) {
-						case 0: //Blanco y Negro
+						case BlancoYNegro: //Blanco y Negro
 							if (imageReady) {
 								imageList->AddNew(Filter().Binario(imageList->getPrevCurrent(), 127, hWnd));
 								imshow(source_window, GetSquareImage(imageList->getCurrent(), defaultSize));
 							}
 							if (videoReady)
 								Filter().BinarioVideo(newvideo, hWnd);
+							if (camaraActiva)
+								filtroCam = BlancoYNegro;
 							break;
-						case 1: //Luminosidad
+						case Luminosidad: //Luminosidad
 							if (imageReady) {
 								imageList->AddNew(Filter().Luminosidad(imageList->getPrevCurrent(), hWnd));
 								imshow(source_window, GetSquareImage(imageList->getCurrent(), defaultSize));
 							}
 							if (videoReady)
 								Filter().LuminosidadVideo(newvideo, hWnd);
+							if (camaraActiva)
+								filtroCam = Luminosidad;
 							break;
-						case 2: //Promedio
+						case Promedio: //Promedio
 							if (imageReady) {
 								imageList->AddNew(Filter().Average(imageList->getPrevCurrent(), hWnd));
 								imshow(source_window, GetSquareImage(imageList->getCurrent(), defaultSize));
 							}
 							if (videoReady)
 								Filter().AverageVideo(newvideo, hWnd);
+							if (camaraActiva)
+								filtroCam = Promedio;
 							break;
-						case 3: //Luminancia
+						case Luminancia: //Luminancia
 							if (imageReady) {
 								imageList->AddNew(Filter().Luminancia(imageList->getPrevCurrent(), hWnd));
 								imshow(source_window, GetSquareImage(imageList->getCurrent(), defaultSize));
 							}
 							if (videoReady)
 								Filter().LuminanciaVideo(newvideo, hWnd);
+							if (camaraActiva)
+								filtroCam = Luminancia;
 							break;
-						case 4: //Sepia
+						case Sepia: //Sepia
 							if (imageReady) {
 								imageList->AddNew(Filter().Sepia(imageList->getPrevCurrent(), hWnd));
 								imshow(source_window, GetSquareImage(imageList->getCurrent(), defaultSize));
 							}
 							if (videoReady)
 								Filter().SepiaVideo(newvideo, hWnd);
+							if (camaraActiva)
+								filtroCam = Sepia;
 							break;
-						case 5: //Binario
+						case Binario: //Binario
 							if (imageReady) {
 								imageList->AddNew(Filter().Binario(imageList->getPrevCurrent(), 155, hWnd));
 								imshow(source_window, GetSquareImage(imageList->getCurrent(), defaultSize));
 							}
 							if (videoReady)
 								Filter().BinarioVideo(newvideo, hWnd);
+							if (camaraActiva)
+								filtroCam = Binario;
 							break;
-						case 6: //Negativo
+						case Negativo: //Negativo
 							int a = 0;
 							if (imageReady) {
 								imageList->AddNew(Filter().Negativo(imageList->getPrevCurrent(), hWnd));
@@ -280,6 +355,8 @@ BOOL CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 							}
 							if(videoReady)
 								Filter().NegativoVideo(newvideo, hWnd);
+							if (camaraActiva)
+								filtroCam = Negativo;
 							break;
 					}
 				}
@@ -311,4 +388,13 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR, int nShowCmd) {
 	}
 
 	return 0;
+}
+
+void stopCamera(HWND hWnd){
+	KillTimer(hWnd, ID_TIMER1);
+	delete cam;
+	camaraActiva = false;
+	imageReady = false;
+	videoReady = false;
+	cvDestroyWindow("VideoStream");
 }

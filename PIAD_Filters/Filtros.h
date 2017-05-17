@@ -45,22 +45,22 @@ public:
 	}
 };
 
-class Mascara:private AjuestesColor{
+class Mascara :private AjuestesColor {
 public:
 	float *mask;
 	int size;
 	float sum;
 	int limitus;
 	int x, y;
-	void printValues(){
+	void printValues() {
 		char *a;
-		for(int i = 0; i<size; i++){
+		for (int i = 0; i < size; i++) {
 			a = new char[2];
 			_itoa(mask[i], a, 10);
 			OutputDebugString(a);
 		}
 	}
-	Mascara(int size){
+	Mascara(int size) {
 		this->size = size;
 		mask = new float[size*size];
 	}
@@ -68,21 +68,78 @@ public:
 		this->size = size;
 		this->mask = mask;
 	}
-	Mat ApplyMask(Mat *img, HWND hWnd){
+	Mat ApplyMask(Mat *img, HWND hWnd) {
 		Mat result;
 		img->copyTo(result);
 		float sum = getSigma();
-		float limit = (size - 1) / 2;
+		int limit = (size - 1) / 2;
 		SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_SETPOS, 0, NULL);
 		SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_SETRANGE, NULL, MAKELPARAM(0, img->rows));
-		Mascara *m = new Mascara(size);
-		int *lim = new int;
 		int x, y;
+		/*
+		Mascara *tes = new Mascara(3);
+		int channels = img->channels();
+		int nRows = img->rows;
+		int nCols = img->cols * channels;
+		uchar *pp, *qq, *rr;
+		int r, g, b;
+		int value;
+		for (y = 1; y < (nRows - 1); y++){
+			pp = img->ptr<uchar>(y-1);
+			qq = img->ptr<uchar>(y);
+			rr = img->ptr<uchar>(y+1);
+			for (x = limit; x < (nCols - 3); x += 3) {
+				tes->setValue(-1, -1, pp[x]);
+				tes->setValue( 0, -1, pp[x+3]);
+				tes->setValue( 1, -1, pp[x+6]);
+
+				tes->setValue(-1, 0, qq[x]);
+				tes->setValue( 0, 0, qq[x+3]);
+				tes->setValue( 1, 0, qq[x+6]);
+
+				tes->setValue(-1, 1, rr[x]);
+				tes->setValue( 0, 1, rr[x+3]);
+				tes->setValue( 1, 1, rr[x+6]);
+				value = saturate(multiply(limit, tes).getSigma() / sum);
+				pp[x] = value;
+				///////////////////////////////////////////////
+
+				tes->setValue(-1, -1, pp[x+1]);
+				tes->setValue( 0, -1, pp[x+4]);
+				tes->setValue( 1, -1, pp[x+7]);
+
+				tes->setValue(-1, 0, qq[x+1]);
+				tes->setValue( 0, 0, qq[x+4]);
+				tes->setValue( 1, 0, qq[x+7]);
+
+				tes->setValue(-1, 1, rr[x+1]);
+				tes->setValue( 0, 1, rr[x+4]);
+				tes->setValue( 1, 1, rr[x+7]);
+				value = saturate(multiply(limit, tes).getSigma() / sum);
+				pp[x+1] = value;
+				///////////////////////////////////////////////
+
+				tes->setValue(-1, -1, pp[x+2]);
+				tes->setValue( 0, -1, pp[x+6]);
+				tes->setValue( 1, -1, pp[x+8]);
+
+				tes->setValue(-1,  0, qq[x+2]);
+				tes->setValue( 0,  0, qq[x+5]);
+				tes->setValue( 1,  0, qq[x+8]);
+
+				tes->setValue(-1,  1, rr[x+2]);
+				tes->setValue( 0,  1, rr[x+5]);
+				tes->setValue( 1,  1, rr[x+8]);
+				value = saturate(multiply(limit, tes).getSigma() / sum);
+				pp[x+2] = value;
+			}
+			SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_STEPIT, NULL, NULL);
+		}*/
 		for (y = limit; y < (img->rows - limit); y++) {
 			for (x = limit; x < (img->cols - limit); x++) {
-				result.at<Vec3b>(y, x)[0] = saturate(abs(multiply(lim, getBitmapArea(lim, m, img, x, y, size, 1)).getSigma() / sum));
-				result.at<Vec3b>(y, x)[1] = saturate(abs(multiply(lim, getBitmapArea(lim, m, img, x, y, size, 2)).getSigma() / sum));
-				result.at<Vec3b>(y, x)[2] = saturate(abs(multiply(lim, getBitmapArea(lim, m, img, x, y, size, 3)).getSigma() / sum));
+				result.at<Vec3b>(y, x)[0] = saturate(abs(multiply(getBitmapArea(img, x, y, size, 1)).getSigma() / sum));
+				result.at<Vec3b>(y, x)[1] = saturate(abs(multiply(getBitmapArea(img, x, y, size, 2)).getSigma() / sum));
+				result.at<Vec3b>(y, x)[2] = saturate(abs(multiply(getBitmapArea(img, x, y, size, 3)).getSigma() / sum));
 			}
 			SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_STEPIT, NULL, NULL);
 		}
@@ -95,10 +152,10 @@ public:
 				sum += mask[y * size + x];
 		return (sum > 0) ? sum : 1;
 	}
-	Mascara multiply(int *limite, Mascara *m) {
-		*limite = ((size - 1) / 2);
-		for (x = -*limite; x <= *limite; x++)
-			for (y = -*limite; y <= *limite; y++)
+	Mascara multiply(Mascara *m) {
+		limitus = ((size - 1) / 2);
+		for (x = -limitus; x <= limitus; x++)
+			for (y = -limitus; y <= limitus; y++)
 				m->setValue(x, y, getValueof(x, y) * m->getValueof(x, y));
 		return *m;
 	}
@@ -136,12 +193,12 @@ public:
 
 		return mask[y * size + x];
 	}
-	Mascara *getBitmapArea(int *limite, Mascara *m, Mat *data, int px, int py, int tamaño, int canal) {
-		m = new Mascara(tamaño);
-		*limite = ((tamaño - 1) / 2);
+	Mascara *getBitmapArea(Mat *data, int px, int py, int tamaño, int canal) {
+		Mascara *m = new Mascara(tamaño);
+		limitus = ((tamaño - 1) / 2);
 
-		for (y = py - *limite; y <= (py + *limite); y++)
-			for (x = px - *limite; x <= (px + *limite); x++)
+		for (y = py - limitus; y <= (py + limitus); y++)
+			for (x = px - limitus; x <= (px + limitus); x++)
 				switch (canal) {
 				case 1:
 					m->setValue(x - px, y - py, data->at<Vec3b>(y, x)[0]);
@@ -187,17 +244,22 @@ public:
 		img = image;
 		SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_SETPOS, 0, NULL);
 		SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_SETRANGE, NULL, MAKELPARAM(0, image.rows));
-		for (y = 0; y < img.rows; y++) {
-			for (x = 0; x < img.cols; x++) {
-				b = saturate(img.at<Vec3b>(y, x)[0]);
-				g = saturate(img.at<Vec3b>(y, x)[1]);
-				r = saturate(img.at<Vec3b>(y, x)[2]);
-				
-				l = (0.2126*r + 0.7152*g + 0.0722*b);
 
-				img.at<Vec3b>(y, x)[0] = l;
-				img.at<Vec3b>(y, x)[1] = l;
-				img.at<Vec3b>(y, x)[2] = l;
+		int channels = image.channels();
+		int nRows = image.rows;
+		int nCols = image.cols * channels;
+		uchar *p;
+
+		for (y = 0; y < nRows; ++y) {
+			p = image.ptr<uchar>(y);
+			for (x = 0; x < (nCols - 3); x += 3) {
+				b = saturate(p[x]);
+				g = saturate(p[x+1]);
+				r = saturate(p[x+2]);
+				l = (0.2126*r + 0.7152*g + 0.0722*b);
+				p[x]   = l;
+				p[x+1] = l;
+				p[x+2] = l;
 			}
 			SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_STEPIT, NULL, NULL);
 		}
@@ -207,17 +269,22 @@ public:
 		img = image;
 		SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_SETPOS, 0, NULL);
 		SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_SETRANGE, NULL, MAKELPARAM(0, image.rows));
-		for (y = 0; y < img.rows; y++) {
-			for (x = 0; x < img.cols; x++) {
-				b = saturate(img.at<Vec3b>(y, x)[0]);
-				g = saturate(img.at<Vec3b>(y, x)[1]);
-				r = saturate(img.at<Vec3b>(y, x)[2]);
+		
+		int channels = image.channels();
+		int nRows = image.rows;
+		int nCols = image.cols * channels;
+		uchar *p;
 
+		for (y = 0; y < nRows; ++y) {
+			p = image.ptr<uchar>(y);
+			for (x = 0; x < (nCols - 3); x += 3) {
+				b = saturate(p[x]);
+				g = saturate(p[x + 1]);
+				r = saturate(p[x + 2]);
 				l = saturate((b + g + r) / 3);
-
-				img.at<Vec3b>(y, x)[0] = l;
-				img.at<Vec3b>(y, x)[1] = l;
-				img.at<Vec3b>(y, x)[2] = l;
+				p[x]     = l;
+				p[x + 1] = l;
+				p[x + 2] = l;
 			}
 			SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_STEPIT, NULL, NULL);
 		}
@@ -227,17 +294,21 @@ public:
 		img = image;
 		SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_SETPOS, 0, NULL);
 		SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_SETRANGE, NULL, MAKELPARAM(0, image.rows));
-		for (y = 0; y < img.rows; y++) {
-			for (x = 0; x < img.cols; x++) {
-				b = saturate(img.at<Vec3b>(y, x)[0]);
-				g = saturate(img.at<Vec3b>(y, x)[1]);
-				r = saturate(img.at<Vec3b>(y, x)[2]);
-
+		
+		int channels = image.channels();
+		int nRows = image.rows;
+		int nCols = image.cols * channels;
+		uchar *p;
+		for (y = 0; y < nRows; ++y) {
+			p = image.ptr<uchar>(y);
+			for (x = 0; x < (nCols - 3); x += 3) {
+				b = saturate(p[x]);
+				g = saturate(p[x + 1]);
+				r = saturate(p[x + 2]);
 				l = (max(r, g, b) + min(r, g, b)) / 2;
-
-				img.at<Vec3b>(y, x)[0] = l;
-				img.at<Vec3b>(y, x)[1] = l;
-				img.at<Vec3b>(y, x)[2] = l;
+				p[x]     = l;
+				p[x + 1] = l;
+				p[x + 2] = l;
 			}
 			SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_STEPIT, NULL, NULL);
 		}
@@ -247,17 +318,20 @@ public:
 		img = image;
 		SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_SETPOS, 0, NULL);
 		SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_SETRANGE, NULL, MAKELPARAM(0, image.rows));
-		for (y = 0; y < img.rows; y++) {
-			for (x = 0; x < img.cols; x++) {
-				b = saturate(img.at<Vec3b>(y, x)[0]);
-				g = saturate(img.at<Vec3b>(y, x)[1]);
-				r = saturate(img.at<Vec3b>(y, x)[2]);
+		int channels = image.channels();
+		int nRows = image.rows;
+		int nCols = image.cols * channels;
+		uchar *p;
+		for (y = 0; y < nRows; ++y) {
+			p = image.ptr<uchar>(y);
+			for (x = 0; x < (nCols - 3); x += 3) {
+				b = saturate(p[x]);
+				g = saturate(p[x + 1]);
+				r = saturate(p[x + 2]);
 
-				l = saturate((b + g + r) / 3);
-
-				img.at<Vec3b>(y, x)[2] = saturate((r * 0.393f) + (g * 0.769f) + (b * 0.189f));
-				img.at<Vec3b>(y, x)[1] = saturate((r * 0.349f) + (g * 0.686f) + (b * 0.168f));
-				img.at<Vec3b>(y, x)[0] = saturate((r * 0.272f) + (g * 0.534f) + (b * 0.131f));
+				p[x]     = saturate((r * 0.272f) + (g * 0.534f) + (b * 0.131f));
+				p[x + 1] = saturate((r * 0.349f) + (g * 0.686f) + (b * 0.168f));
+				p[x + 2] = saturate((r * 0.393f) + (g * 0.769f) + (b * 0.189f));
 			}
 			SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_STEPIT, NULL, NULL);
 		}
@@ -267,15 +341,20 @@ public:
 		img = image;
 		SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_SETPOS, 0, NULL);
 		SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_SETRANGE, NULL, MAKELPARAM(0, image.rows));
-		for (y = 0; y < img.rows; y++) {
-			for (x = 0; x < img.cols; x++) {
-				b = saturate(img.at<Vec3b>(y, x)[0]);
-				g = saturate(img.at<Vec3b>(y, x)[1]);
-				r = saturate(img.at<Vec3b>(y, x)[2]);
+		int channels = image.channels();
+		int nRows = image.rows;
+		int nCols = image.cols * channels;
+		uchar *p;
+		for (y = 0; y < nRows; ++y) {
+			p = image.ptr<uchar>(y);
+			for (x = 0; x < (nCols - 3); x += 3) {
+				b = saturate(p[x]);
+				g = saturate(p[x + 1]);
+				r = saturate(p[x + 2]);
 
-				img.at<Vec3b>(y, x)[2] = 255 - b;
-				img.at<Vec3b>(y, x)[1] = 255 - g;
-				img.at<Vec3b>(y, x)[0] = 255 - r;
+				p[x]     = 255 - b;
+				p[x + 1] = 255 - g;
+				p[x + 2] = 255 - r;
 			}
 			SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_STEPIT, NULL, NULL);
 		}
@@ -286,16 +365,21 @@ public:
 		Mat result(image);
 		SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_SETPOS, 0, NULL);
 		SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_SETRANGE, NULL, MAKELPARAM(0, image.rows));
-		for (y = 0; y < img.rows; y++) {
-			for (x = 0; x < img.cols; x++) {
-				if(saturate(img.at<Vec3b>(y, x)[0]) < threshold){
-					result.at<Vec3b>(y, x)[2] = 0;
-					result.at<Vec3b>(y, x)[1] = 0;
-					result.at<Vec3b>(y, x)[0] = 0;
+		int channels = image.channels();
+		int nRows = image.rows;
+		int nCols = image.cols * channels;
+		uchar *p;
+		for (y = 0; y < nRows; ++y) {
+			p = image.ptr<uchar>(y);
+			for (x = 0; x < (nCols - 3); x += 3) {
+				if(saturate(p[x]) < threshold){
+					p[x]     = 0;
+					p[x + 1] = 0;
+					p[x + 2] = 0;
 				}else{
-					result.at<Vec3b>(y, x)[2] = 255;
-					result.at<Vec3b>(y, x)[1] = 255;
-					result.at<Vec3b>(y, x)[0] = 255;
+					p[x]     = 255;
+					p[x + 1] = 255;
+					p[x + 2] = 255;
 				}
 			}
 			SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_STEPIT, NULL, NULL);
