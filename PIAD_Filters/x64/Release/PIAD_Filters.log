@@ -1,75 +1,7 @@
-﻿  Source.cpp
-c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(59): warning C4244: 'argumento': conversión de 'float' a 'int'; posible pérdida de datos
-c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(140): warning C4244: 'argumento': conversión de 'float' a 'int'; posible pérdida de datos
-c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(141): warning C4244: 'argumento': conversión de 'float' a 'int'; posible pérdida de datos
-c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(142): warning C4244: 'argumento': conversión de 'float' a 'int'; posible pérdida de datos
-c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(308): warning C4002: hay demasiados parámetros reales para la macro 'max'
-c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(308): warning C4002: hay demasiados parámetros reales para la macro 'min'
-c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(256): warning C4244: '=': conversión de 'int' a 'float'; posible pérdida de datos
-c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(257): warning C4244: '=': conversión de 'int' a 'float'; posible pérdida de datos
-c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(258): warning C4244: '=': conversión de 'int' a 'float'; posible pérdida de datos
-c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(259): warning C4244: '=': conversión de 'double' a 'int'; posible pérdida de datos
-c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(281): warning C4244: '=': conversión de 'int' a 'float'; posible pérdida de datos
-c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(282): warning C4244: '=': conversión de 'int' a 'float'; posible pérdida de datos
-c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(283): warning C4244: '=': conversión de 'int' a 'float'; posible pérdida de datos
-c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(284): warning C4244: 'argumento': conversión de 'float' a 'int'; posible pérdida de datos
-c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(305): warning C4244: '=': conversión de 'int' a 'float'; posible pérdida de datos
-c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(306): warning C4244: '=': conversión de 'int' a 'float'; posible pérdida de datos
-c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(307): warning C4244: '=': conversión de 'int' a 'float'; posible pérdida de datos
-c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(308): warning C4244: '=': conversión de 'float' a 'int'; posible pérdida de datos
-c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(328): warning C4244: '=': conversión de 'int' a 'float'; posible pérdida de datos
-c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(329): warning C4244: '=': conversión de 'int' a 'float'; posible pérdida de datos
-c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(330): warning C4244: '=': conversión de 'int' a 'float'; posible pérdida de datos
-c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(332): warning C4244: 'argumento': conversión de 'float' a 'int'; posible pérdida de datos
-c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(333): warning C4244: 'argumento': conversión de 'float' a 'int'; posible pérdida de datos
-c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(334): warning C4244: 'argumento': conversión de 'float' a 'int'; posible pérdida de datos
-c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(351): warning C4244: '=': conversión de 'int' a 'float'; posible pérdida de datos
-c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(352): warning C4244: '=': conversión de 'int' a 'float'; posible pérdida de datos
-c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(353): warning C4244: '=': conversión de 'int' a 'float'; posible pérdida de datos
-c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(355): warning C4244: '=': conversión de 'float' a 'uchar'; posible pérdida de datos
-c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(356): warning C4244: '=': conversión de 'float' a 'uchar'; posible pérdida de datos
-c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(357): warning C4244: '=': conversión de 'float' a 'uchar'; posible pérdida de datos
-c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(436): warning C4244: 'inicializando': conversión de 'double' a 'float'; posible pérdida de datos
-c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(437): warning C4244: 'inicializando': conversión de 'double' a 'float'; posible pérdida de datos
-c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(438): warning C4244: 'inicializando': conversión de 'double' a 'float'; posible pérdida de datos
-c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(444): warning C4244: 'argumento': conversión de 'int' a 'float'; posible pérdida de datos
-c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(445): warning C4244: 'argumento': conversión de 'int' a 'float'; posible pérdida de datos
-c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(446): warning C4244: 'argumento': conversión de 'int' a 'float'; posible pérdida de datos
-c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(447): warning C4244: 'argumento': conversión de 'int' a 'float'; posible pérdida de datos
-c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(449): warning C4244: 'argumento': conversión de 'int' a 'float'; posible pérdida de datos
-c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(450): warning C4244: 'argumento': conversión de 'int' a 'float'; posible pérdida de datos
-c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(451): warning C4244: 'argumento': conversión de 'int' a 'float'; posible pérdida de datos
-c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(452): warning C4244: 'argumento': conversión de 'int' a 'float'; posible pérdida de datos
-c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(454): warning C4244: 'argumento': conversión de 'int' a 'float'; posible pérdida de datos
-c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(504): warning C4244: 'argumento': conversión de 'float' a 'int'; posible pérdida de datos
-c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(505): warning C4244: 'argumento': conversión de 'float' a 'int'; posible pérdida de datos
-c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(506): warning C4244: 'argumento': conversión de 'float' a 'int'; posible pérdida de datos
-c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(516): warning C4244: 'argumento': conversión de 'float' a 'int'; posible pérdida de datos
-c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(516): warning C4244: '=': conversión de 'int' a 'float'; posible pérdida de datos
-c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(517): warning C4244: '=': conversión de 'float' a 'uchar'; posible pérdida de datos
-c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(518): warning C4244: '=': conversión de 'float' a 'uchar'; posible pérdida de datos
-c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(519): warning C4244: '=': conversión de 'float' a 'uchar'; posible pérdida de datos
-c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(528): warning C4244: 'argumento': conversión de 'float' a 'int'; posible pérdida de datos
-c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(528): warning C4244: '=': conversión de 'int' a 'float'; posible pérdida de datos
-c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(529): warning C4244: '=': conversión de 'float' a 'uchar'; posible pérdida de datos
-c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(530): warning C4244: '=': conversión de 'float' a 'uchar'; posible pérdida de datos
-c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(531): warning C4244: '=': conversión de 'float' a 'uchar'; posible pérdida de datos
-c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(904): warning C4244: '=': conversión de 'float' a 'int'; posible pérdida de datos
-c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(910): warning C4244: '=': conversión de 'float' a 'int'; posible pérdida de datos
-c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(936): warning C4244: 'inicializando': conversión de 'double' a 'float'; posible pérdida de datos
-c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(949): warning C4244: 'inicializando': conversión de 'double' a 'float'; posible pérdida de datos
-c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(950): warning C4244: 'inicializando': conversión de 'double' a 'float'; posible pérdida de datos
-c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(951): warning C4244: 'inicializando': conversión de 'double' a 'float'; posible pérdida de datos
-c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(952): warning C4244: 'inicializando': conversión de 'double' a 'float'; posible pérdida de datos
-c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(953): warning C4244: 'inicializando': conversión de 'double' a 'float'; posible pérdida de datos
-c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(954): warning C4244: 'argumento': conversión de 'float' a 'int'; posible pérdida de datos
-Source.cpp(178): warning C4244: 'inicializando': conversión de 'LRESULT' a 'int'; posible pérdida de datos
-Source.cpp(199): warning C4305: 'argumento': truncamiento de 'double' a 'float'
-Source.cpp(287): warning C4244: 'inicializando': conversión de 'LRESULT' a 'int'; posible pérdida de datos
-  Generando código
-  27 of 189 functions (14.3%) were compiled, the rest were copied from previous compilation.
-    1 functions were new in current compilation
-    13 functions had inline decision re-evaluated but remain unchanged
+﻿  Generando código
+  23 of 189 functions (12.2%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    15 functions had inline decision re-evaluated but remain unchanged
   Generación de código finalizada
   PIAD_Filters.vcxproj -> C:\Users\Andres\Documents\Visual Studio 2015\Projects\PIAD_Filters\x64\Release\PIAD_Filters.exe
   PIAD_Filters.vcxproj -> C:\Users\Andres\Documents\Visual Studio 2015\Projects\PIAD_Filters\x64\Release\PIAD_Filters.pdb (Full PDB)

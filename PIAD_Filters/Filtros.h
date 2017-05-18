@@ -76,6 +76,7 @@ public:
 		SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_SETPOS, 0, NULL);
 		SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_SETRANGE, NULL, MAKELPARAM(0, img->rows));
 		int x, y;
+		int r, g, b;
 		/*
 		Mascara *tes = new Mascara(3);
 		int channels = img->channels();
@@ -135,11 +136,15 @@ public:
 			}
 			SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_STEPIT, NULL, NULL);
 		}*/
+		int channels = img->channels();
+		int nRows = img->rows;
+		uchar *p = img->data;
+		uchar *res = result.data;
 		for (y = limit; y < (img->rows - limit); y++) {
 			for (x = limit; x < (img->cols - limit); x++) {
-				result.at<Vec3b>(y, x)[0] = saturate(abs(multiply(getBitmapArea(img, x, y, size, 1)).getSigma() / sum));
-				result.at<Vec3b>(y, x)[1] = saturate(abs(multiply(getBitmapArea(img, x, y, size, 2)).getSigma() / sum));
-				result.at<Vec3b>(y, x)[2] = saturate(abs(multiply(getBitmapArea(img, x, y, size, 3)).getSigma() / sum));
+				res[result.step * y + x * channels + 0] = saturate(abs(multiply(getBitmapArea(img, x, y, size, 1)).getSigma() / sum));
+				res[result.step * y + x * channels + 1] = saturate(abs(multiply(getBitmapArea(img, x, y, size, 2)).getSigma() / sum));
+				res[result.step * y + x * channels + 2] = saturate(abs(multiply(getBitmapArea(img, x, y, size, 3)).getSigma() / sum));
 			}
 			SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_STEPIT, NULL, NULL);
 		}
@@ -193,6 +198,20 @@ public:
 
 		return mask[y * size + x];
 	}
+	float getPixel(Mat *img, int x, int y, int channel){
+		unsigned char *p = (unsigned char*)img->data;
+		int channels = img->channels();
+		switch (channel) {
+		case 1:
+			return p[img->step * y + x * channels + 0];
+		case 2:
+			return p[img->step * y + x * channels + 1];
+		case 3:
+			return p[img->step * y + x * channels + 2];
+		default:
+			return -1;
+		}
+	}
 	Mascara *getBitmapArea(Mat *data, int px, int py, int tamaño, int canal) {
 		Mascara *m = new Mascara(tamaño);
 		limitus = ((tamaño - 1) / 2);
@@ -201,13 +220,13 @@ public:
 			for (x = px - limitus; x <= (px + limitus); x++)
 				switch (canal) {
 				case 1:
-					m->setValue(x - px, y - py, data->at<Vec3b>(y, x)[0]);
+					m->setValue(x - px, y - py, getPixel(data, x, y, 1));
 					break;
 				case 2:
-					m->setValue(x - px, y - py, data->at<Vec3b>(y, x)[1]);
+					m->setValue(x - px, y - py, getPixel(data, x, y, 2));
 					break;
 				case 3:
-					m->setValue(x - px, y - py, data->at<Vec3b>(y, x)[2]);
+					m->setValue(x - px, y - py, getPixel(data, x, y, 3));
 					break;
 				}
 		return m;

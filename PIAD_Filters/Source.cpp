@@ -95,8 +95,10 @@ BOOL CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					camaraActiva = true;
 					imageReady = false;
 					videoReady = false;
-				}else
+				}else {
 					stopCamera(hWnd);
+					delete cam;
+				}
 				break;
 			}
 			case SAVE_FILE:{
@@ -120,10 +122,10 @@ BOOL CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					imageList->Add(new Imagen(original));
 					namedWindow(source_window, CV_WINDOW_AUTOSIZE);
 					imshow(source_window, GetSquareImage(imageList->getCurrent(), defaultSize));
+					stopCamera(hWnd);
+					camaraActiva = false;
 					imageReady = true;
 					videoReady = false;
-					camaraActiva = false;
-					stopCamera(hWnd);
 				}
 				break;
 			}
@@ -133,10 +135,10 @@ BOOL CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					vidOriginal.open(videoPath);
 					if (vidOriginal.isOpened()) {
 						newvideo = loadVideo(&vidOriginal, hWnd);
+						stopCamera(hWnd);
 						videoReady = true;
 						imageReady = false;
 						camaraActiva = false;
-						stopCamera(hWnd);
 					}
 				}
 				break;
@@ -392,9 +394,6 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR, int nShowCmd) {
 
 void stopCamera(HWND hWnd){
 	KillTimer(hWnd, ID_TIMER1);
-	delete cam;
 	camaraActiva = false;
-	imageReady = false;
-	videoReady = false;
 	cvDestroyWindow("VideoStream");
 }
