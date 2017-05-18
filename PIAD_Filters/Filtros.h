@@ -140,14 +140,19 @@ public:
 		int nRows = img->rows;
 		uchar *p = img->data;
 		uchar *res = result.data;
+		Mascara *m = new Mascara(size);
 		for (y = limit; y < (img->rows - limit); y++) {
 			for (x = limit; x < (img->cols - limit); x++) {
-				res[result.step * y + x * channels + 0] = saturate(abs(multiply(getBitmapArea(img, x, y, size, 1)).getSigma() / sum));
-				res[result.step * y + x * channels + 1] = saturate(abs(multiply(getBitmapArea(img, x, y, size, 2)).getSigma() / sum));
-				res[result.step * y + x * channels + 2] = saturate(abs(multiply(getBitmapArea(img, x, y, size, 3)).getSigma() / sum));
+				getBitmapArea(m, img, x, y, size, 1);
+				res[result.step * y + x * channels + 0] = saturate(abs(multiply(m).getSigma() / sum));
+				getBitmapArea(m, img, x, y, size, 2);
+				res[result.step * y + x * channels + 1] = saturate(abs(multiply(m).getSigma() / sum));
+				getBitmapArea(m, img, x, y, size, 3);
+				res[result.step * y + x * channels + 2] = saturate(abs(multiply(m).getSigma() / sum));
 			}
 			SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_STEPIT, NULL, NULL);
 		}
+		delete m;
 		return result;
 	}
 	float getSigma() {
@@ -212,8 +217,7 @@ public:
 			return -1;
 		}
 	}
-	Mascara *getBitmapArea(Mat *data, int px, int py, int tamaño, int canal) {
-		Mascara *m = new Mascara(tamaño);
+	void getBitmapArea(Mascara *m, Mat *data, int px, int py, int tamaño, int canal) {
 		limitus = ((tamaño - 1) / 2);
 
 		for (y = py - limitus; y <= (py + limitus); y++)
@@ -229,7 +233,6 @@ public:
 					m->setValue(x - px, y - py, getPixel(data, x, y, 3));
 					break;
 				}
-		return m;
 	}
 	int getSize() {
 		return size * size;
