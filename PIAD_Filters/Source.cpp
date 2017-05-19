@@ -3,6 +3,11 @@
 #include <Windows.h>
 #include "Stuff.h"
 #include "resource.h"
+
+char* source_window = "Imagen";
+char* video_window = "Video";
+char* camera_window = "Camara";
+
 #include "Filtros.h"
 #include <CommCtrl.h>
 
@@ -27,7 +32,6 @@ HWND timer1;
 
 void stopCamera(HWND);
 
-char* source_window = "Source image";
 bool imageReady = false;
 bool videoReady = false;
 int defaultSize = 720;
@@ -80,8 +84,8 @@ BOOL CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 						Filter().Negativo(frame, NULL);
 						break;
 					}
-				namedWindow("VideoStream", WINDOW_AUTOSIZE);
-				imshow("VideoStream", frame);
+				namedWindow(camera_window, WINDOW_AUTOSIZE);
+				imshow(camera_window, frame);
 				break;
 		}
 		break;
@@ -91,10 +95,14 @@ BOOL CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			case CAMERA:{
 				if (!camaraActiva) {
 					cam = new VideoCapture(0);
-					SetTimer(hWnd, ID_TIMER1, 1, NULL);
-					camaraActiva = true;
-					imageReady = false;
-					videoReady = false;
+					if (cam->isOpened()) {
+						SetTimer(hWnd, ID_TIMER1, 1, NULL);
+						camaraActiva = true;
+						imageReady = false;
+						videoReady = false;
+					}else{
+						MessageBox(hWnd, "No se detecto una camara", "Error", MB_ICONERROR);
+					}
 				}else {
 					stopCamera(hWnd);
 					delete cam;
@@ -151,7 +159,7 @@ BOOL CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				break;
 			case PLAY_VIDEO:{
 				if(videoReady)
-					playVideo(newvideo);
+					playVideo(newvideo, hWnd);
 				break;
 			}
 			case RESET:{
@@ -395,5 +403,5 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR, int nShowCmd) {
 void stopCamera(HWND hWnd){
 	KillTimer(hWnd, ID_TIMER1);
 	camaraActiva = false;
-	cvDestroyWindow("VideoStream");
+	cvDestroyWindow(camera_window);
 }

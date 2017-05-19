@@ -56,20 +56,19 @@ c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\
 c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(492): warning C4244: '=': conversión de 'float' a 'uchar'; posible pérdida de datos
 c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(865): warning C4244: '=': conversión de 'float' a 'int'; posible pérdida de datos
 c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(871): warning C4244: '=': conversión de 'float' a 'int'; posible pérdida de datos
-c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(897): warning C4244: 'inicializando': conversión de 'double' a 'float'; posible pérdida de datos
-c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(910): warning C4244: 'inicializando': conversión de 'double' a 'float'; posible pérdida de datos
-c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(911): warning C4244: 'inicializando': conversión de 'double' a 'float'; posible pérdida de datos
-c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(912): warning C4244: 'inicializando': conversión de 'double' a 'float'; posible pérdida de datos
-c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(913): warning C4244: 'inicializando': conversión de 'double' a 'float'; posible pérdida de datos
-c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(914): warning C4244: 'inicializando': conversión de 'double' a 'float'; posible pérdida de datos
-c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(915): warning C4244: 'argumento': conversión de 'float' a 'int'; posible pérdida de datos
-Source.cpp(180): warning C4244: 'inicializando': conversión de 'LRESULT' a 'int'; posible pérdida de datos
-Source.cpp(201): warning C4305: 'argumento': truncamiento de 'double' a 'float'
-Source.cpp(289): warning C4244: 'inicializando': conversión de 'LRESULT' a 'int'; posible pérdida de datos
+c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(900): warning C4244: 'inicializando': conversión de 'double' a 'float'; posible pérdida de datos
+c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(901): warning C4244: 'inicializando': conversión de 'double' a 'float'; posible pérdida de datos
+c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(902): warning C4244: 'inicializando': conversión de 'double' a 'float'; posible pérdida de datos
+c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(903): warning C4244: 'inicializando': conversión de 'double' a 'float'; posible pérdida de datos
+c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(904): warning C4244: 'inicializando': conversión de 'double' a 'float'; posible pérdida de datos
+c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(905): warning C4244: 'argumento': conversión de 'float' a 'int'; posible pérdida de datos
+Source.cpp(188): warning C4244: 'inicializando': conversión de 'LRESULT' a 'int'; posible pérdida de datos
+Source.cpp(209): warning C4305: 'argumento': truncamiento de 'double' a 'float'
+Source.cpp(297): warning C4244: 'inicializando': conversión de 'LRESULT' a 'int'; posible pérdida de datos
   Generando código
-  27 of 191 functions (14.1%) were compiled, the rest were copied from previous compilation.
-    3 functions were new in current compilation
-    18 functions had inline decision re-evaluated but remain unchanged
+  28 of 191 functions (14.7%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    14 functions had inline decision re-evaluated but remain unchanged
   Generación de código finalizada
   PIAD_Filters.vcxproj -> C:\Users\Andres\Documents\Visual Studio 2015\Projects\PIAD_Filters\x64\Release\PIAD_Filters.exe
   PIAD_Filters.vcxproj -> C:\Users\Andres\Documents\Visual Studio 2015\Projects\PIAD_Filters\x64\Release\PIAD_Filters.pdb (Full PDB)

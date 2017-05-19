@@ -714,8 +714,8 @@ public:
 		}
 
 		/// Display
-		namedWindow("calcHist Demo", CV_WINDOW_AUTOSIZE);
-		imshow("calcHist Demo", histImage);
+		namedWindow("Histograma", CV_WINDOW_AUTOSIZE);
+		imshow("Histograma", histImage);
 	}
 	void createHistogram(Mat img){
 		int x, y;
@@ -883,24 +883,14 @@ void updateFilterCount(HWND hWnd, int value){
 	SetWindowText(GetDlgItem(hWnd, FILTER_COUNT), count);
 }
 
-void playVideo(VideoInfo *vid){
-	namedWindow("A_good_name", CV_WINDOW_AUTOSIZE);
+void playVideo(VideoInfo *vid, HWND hWnd){
+	namedWindow(video_window, CV_WINDOW_AUTOSIZE);
+	SendMessage(GetDlgItem(hWnd, PROGRESS_BAR2), PBM_SETPOS, 0, NULL);
+	SendMessage(GetDlgItem(hWnd, PROGRESS_BAR2), PBM_SETRANGE, NULL, MAKELPARAM(0, vid->fps));
 	Mat frame;
 	for (int i = 0; i < vid->fps; i++) {
-		imshow("A_good_name", vid->frames[i].frame);
-		if (waitKey(30) == 27)
-			break;
-	}
-}
-
-void playVideo(VideoCapture *vid) {
-	float fps = vid->get(CV_CAP_PROP_FRAME_COUNT);
-	namedWindow("A_good_name", CV_WINDOW_AUTOSIZE);
-	Mat frame;
-	for (int i = 0; i < fps; i++) {
-		vid->set(CV_CAP_PROP_POS_FRAMES, i);
-		vid->read(frame);
-		imshow("A_good_name", frame);
+		imshow(video_window, vid->frames[i].frame);
+		SendMessage(GetDlgItem(hWnd, PROGRESS_BAR2), PBM_SETPOS, i, NULL);
 		if (waitKey(30) == 27)
 			break;
 	}
