@@ -76,70 +76,9 @@ public:
 		SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_SETPOS, 0, NULL);
 		SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_SETRANGE, NULL, MAKELPARAM(0, img->rows));
 		int x, y;
-		int r, g, b;
-		/*
-		Mascara *tes = new Mascara(3);
 		int channels = img->channels();
-		int nRows = img->rows;
-		int nCols = img->cols * channels;
-		uchar *pp, *qq, *rr;
-		int r, g, b;
-		int value;
-		for (y = 1; y < (nRows - 1); y++){
-			pp = img->ptr<uchar>(y-1);
-			qq = img->ptr<uchar>(y);
-			rr = img->ptr<uchar>(y+1);
-			for (x = limit; x < (nCols - 3); x += 3) {
-				tes->setValue(-1, -1, pp[x]);
-				tes->setValue( 0, -1, pp[x+3]);
-				tes->setValue( 1, -1, pp[x+6]);
-
-				tes->setValue(-1, 0, qq[x]);
-				tes->setValue( 0, 0, qq[x+3]);
-				tes->setValue( 1, 0, qq[x+6]);
-
-				tes->setValue(-1, 1, rr[x]);
-				tes->setValue( 0, 1, rr[x+3]);
-				tes->setValue( 1, 1, rr[x+6]);
-				value = saturate(multiply(limit, tes).getSigma() / sum);
-				pp[x] = value;
-				///////////////////////////////////////////////
-
-				tes->setValue(-1, -1, pp[x+1]);
-				tes->setValue( 0, -1, pp[x+4]);
-				tes->setValue( 1, -1, pp[x+7]);
-
-				tes->setValue(-1, 0, qq[x+1]);
-				tes->setValue( 0, 0, qq[x+4]);
-				tes->setValue( 1, 0, qq[x+7]);
-
-				tes->setValue(-1, 1, rr[x+1]);
-				tes->setValue( 0, 1, rr[x+4]);
-				tes->setValue( 1, 1, rr[x+7]);
-				value = saturate(multiply(limit, tes).getSigma() / sum);
-				pp[x+1] = value;
-				///////////////////////////////////////////////
-
-				tes->setValue(-1, -1, pp[x+2]);
-				tes->setValue( 0, -1, pp[x+6]);
-				tes->setValue( 1, -1, pp[x+8]);
-
-				tes->setValue(-1,  0, qq[x+2]);
-				tes->setValue( 0,  0, qq[x+5]);
-				tes->setValue( 1,  0, qq[x+8]);
-
-				tes->setValue(-1,  1, rr[x+2]);
-				tes->setValue( 0,  1, rr[x+5]);
-				tes->setValue( 1,  1, rr[x+8]);
-				value = saturate(multiply(limit, tes).getSigma() / sum);
-				pp[x+2] = value;
-			}
-			SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_STEPIT, NULL, NULL);
-		}*/
-		int channels = img->channels();
-		int nRows = img->rows;
-		uchar *p = img->data;
-		uchar *res = result.data;
+		unsigned char *p = img->data;
+		unsigned char *res = result.data;
 		Mascara *m = new Mascara(size);
 		for (y = limit; y < (img->rows - limit); y++) {
 			for (x = limit; x < (img->cols - limit); x++) {
