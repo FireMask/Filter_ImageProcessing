@@ -840,7 +840,7 @@ String SaveFile(LPCSTR ext) {
 	if(!strcmp(ext, "jpg"))
 		ofn.lpstrFilter = "JPG Image (*.jpg)\0";
 	if (!strcmp(ext, "avi"))
-		ofn.lpstrFilter = "Mp4 Video (*.avi)\0";
+		ofn.lpstrFilter = "AVI Video (*.avi)\0";
 	ofn.lpstrFile = szFileName;
 	ofn.nMaxFile = MAX_PATH;
 	ofn.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;

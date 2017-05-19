@@ -11,8 +11,6 @@ char* camera_window = "Camara";
 #include "Filtros.h"
 #include <CommCtrl.h>
 
-#include <string>
-
 using namespace cv;
 
 //Global Varialbes
@@ -24,7 +22,29 @@ VideoInfo *newvideo;
 Histograma *hist;
 VideoCapture *cam;
 
-enum VideoFilter { BlancoYNegro, Luminosidad, Promedio, Luminancia, Sepia, Binario, Negativo };
+enum VideoFilter {	
+	BlancoYNegro,
+	Luminosidad,
+	Promedio,
+	Luminancia,
+	Sepia,
+	Binario,
+	Negativo,
+	Media,
+	MediaPonderada,
+	Mediana,
+	Blur,
+	Gaussiano,
+	Laplaciano,
+	MenosLaplaciano,
+	SobelF,
+	CorreccionLogaritmica,
+	Potencia,
+	Sharpen,
+	PasoBajo,
+	SustraccionMedia,
+	Original = -1
+};
 
 HWND timer1;
 
@@ -83,6 +103,45 @@ BOOL CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					case Negativo:
 						Filter().Negativo(frame, NULL);
 						break;
+					case Media:
+						frame = Filter().Media(&frame);
+						break;
+					case MediaPonderada:
+						frame = Filter().MediaPonderada(&frame);
+						break;
+					case Mediana:
+						frame = Filter().Media(&frame);
+						break;
+					case Blur:
+						frame = Filter().Media(&frame);
+						break;
+					case Gaussiano:
+						frame = Filter().Gaussiano(&frame);
+						break;
+					case Laplaciano:
+						frame = Filter().Laplaciano(&frame);
+						break;
+					case MenosLaplaciano:
+						frame = Filter().MenosLaplaciano(&frame);
+						break;
+					case SobelF:
+						frame = Filter().Sobel(&frame);
+						break;
+					case CorreccionLogaritmica:
+						frame = Filter().CorreccionLogaritmica(&frame);
+						break;
+					case Potencia:
+						frame = Filter().Potencia(&frame);
+						break;
+					case Sharpen:
+						frame = Filter().Sharpen(&frame);
+						break;
+					case PasoBajo:
+						frame = Filter().PasoBajo(&frame);
+						break;
+					case SustraccionMedia:
+						frame = Filter().SustraccionMedia(&frame);
+						break;
 					}
 				namedWindow(camera_window, WINDOW_AUTOSIZE);
 				imshow(camera_window, frame);
@@ -137,6 +196,9 @@ BOOL CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				}
 				break;
 			}
+			case SET_ORIGINAL:
+				filtroCam = Original;
+				break;
 			case SELECT_VIDEO:{
 				String videoPath(getFileNameVideo());
 				if (videoPath.compare("")) {
@@ -187,7 +249,7 @@ BOOL CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			case APPLY_FILTER:{
 				int value = SendMessage(GetDlgItem(hWnd, FILTER_BOX), CB_GETCURSEL, NULL, NULL);
 				if (value != -1) {
-					if (imageReady) {
+					if(imageReady) {
 						switch (value) {
 							case 0: //Media
 								imageList->AddNew(flt.Media(&imageList->getPrevCurrent()));
@@ -283,6 +345,49 @@ BOOL CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 							break;
 						case 12: //Sustraccion de la Media
 							Filter().SustraccionMediaVideo(newvideo, hWnd);
+							break;
+						}
+					}
+					if(camaraActiva){
+						switch (value) {
+						case 0: //Media
+							filtroCam = Media;
+							break;
+						case 1: //Media Ponderada
+							filtroCam = MediaPonderada;
+							break;
+						case 2: //Mediana
+							filtroCam = Mediana;
+							break;
+						case 3: //Blur
+							filtroCam = Blur;
+							break;
+						case 4: //Gaussiano
+							filtroCam = Gaussiano;
+							break;
+						case 5: //Laplaciano
+							filtroCam = Laplaciano;
+							break;
+						case 6: //Menos Laplaciano
+							filtroCam = MenosLaplaciano;
+							break;
+						case 7: //Sobel
+							filtroCam = SobelF;
+							break;
+						case 8: //Corrección Logaritmica
+							filtroCam = CorreccionLogaritmica;
+							break;
+						case 9: //Potencia
+							filtroCam = Potencia;
+							break;
+						case 10: //Sharpen
+							filtroCam = Sharpen;
+							break;
+						case 11: //Paso Bajo
+							filtroCam = PasoBajo;
+							break;
+						case 12: //Sustraccion de la Media
+							filtroCam = SustraccionMedia;
 							break;
 						}
 					}

@@ -62,9 +62,9 @@ c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\
 c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(903): warning C4244: 'inicializando': conversión de 'double' a 'float'; posible pérdida de datos
 c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(904): warning C4244: 'inicializando': conversión de 'double' a 'float'; posible pérdida de datos
 c:\users\andres\documents\visual studio 2015\projects\piad_filters\piad_filters\Filtros.h(905): warning C4244: 'argumento': conversión de 'float' a 'int'; posible pérdida de datos
-Source.cpp(188): warning C4244: 'inicializando': conversión de 'LRESULT' a 'int'; posible pérdida de datos
-Source.cpp(209): warning C4305: 'argumento': truncamiento de 'double' a 'float'
-Source.cpp(297): warning C4244: 'inicializando': conversión de 'LRESULT' a 'int'; posible pérdida de datos
+Source.cpp(250): warning C4244: 'inicializando': conversión de 'LRESULT' a 'int'; posible pérdida de datos
+Source.cpp(271): warning C4305: 'argumento': truncamiento de 'double' a 'float'
+Source.cpp(402): warning C4244: 'inicializando': conversión de 'LRESULT' a 'int'; posible pérdida de datos
   Generando código
   28 of 191 functions (14.7%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
