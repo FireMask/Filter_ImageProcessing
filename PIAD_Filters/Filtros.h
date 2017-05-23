@@ -43,6 +43,12 @@ public:
 			value = 0;
 		return value;
 	}
+	static unsigned char *getPixelRGB(Mat *img, int x, int y) {
+		unsigned char *p = (unsigned char*)img->data;
+		int channels = img->channels();
+		p = &p[img->step * y + x * channels + 0];
+		return new unsigned char[3]{ *p, *p++, *p++ };
+	}
 };
 
 class Mascara :private AjuestesColor {
@@ -142,7 +148,7 @@ public:
 
 		return mask[y * size + x];
 	}
-	float getPixel(Mat *img, int x, int y, int channel){
+	char getPixel(Mat *img, int x, int y, int channel){
 		unsigned char *p = (unsigned char*)img->data;
 		int channels = img->channels();
 		switch (channel) {
@@ -656,16 +662,59 @@ public:
 
 class Histograma:private AjuestesColor{
 public:
-	int *histograma[3];
+	int histograma[256];
+	int cdf[256];
+	unsigned char newValues[256];
+	int pixelAmount;
 	Histograma(){
-		histograma[0] = new int[256];
-		histograma[1] = new int[256];
-		histograma[2] = new int[256];
-		for(int i = 0; i < 256; i++){
-			histograma[0][i] = 0;
-			histograma[1][i] = 0;
-			histograma[2][i] = 0;
+		for (int i = 0; i < 256; i++) {
+			histograma[i] = 0;
+			newValues[i] = 0;
 		}
+	}	
+	float getCDFMin() {
+		int i = 0;
+		while (cdf[i] <= 0) i++;
+		return cdf[i];
+	}
+	float getCDFMaxR() {
+		int i = 255;
+		while (cdf[i] <= 0)
+			i--;
+		return cdf[i];
+	}
+	float getHistoMin() {
+		int i = 0;
+		while (histograma[i] <= 0)
+			i++;
+		return i;
+	}
+	float getHistoMaxR() {
+		int i = 255;
+		while (histograma[i] <= 0)
+			i--;
+		return i;
+	}
+	float *rgb2hsv(unsigned char r, unsigned char g, unsigned char b){
+		float HSV[3] = { 0,0,0 };
+		float R = saturate((float)r / 255);
+		float G = saturate((float)g / 255);
+		float B = saturate((float)b / 255);
+		unsigned char minRGB = min(r, min(g,b));
+		unsigned char maxRGB = max(r, max(g, b));
+		if(minRGB == maxRGB){
+			HSV[2] = minRGB;
+			return HSV;
+		}
+		float d = (R == minRGB) ? G - B : ((B == minRGB) ? R - G : B - R);
+		float h = (R == minRGB) ? 3 : ((B == minRGB) ? 1 : 5);
+		HSV[0] = 60 * (h - d / (maxRGB - minRGB));
+		HSV[1] = (maxRGB - minRGB) / maxRGB;
+		HSV[2] = maxRGB;
+		return HSV;
+	}
+	float *rgb2hsv(unsigned char *rgb) {
+		return rgb2hsv(rgb[0], rgb[1], rgb[2]);
 	}
 	void plotHistogram(Mat img){
 		Mat dst;
@@ -717,14 +766,111 @@ public:
 		namedWindow("Histograma", CV_WINDOW_AUTOSIZE);
 		imshow("Histograma", histImage);
 	}
-	void createHistogram(Mat img){
-		int x, y;
-		for (y = 0; y < img.rows; y++) {
-			for (x = 0; x < img.cols; x++) {
-				histograma[0][img.at<Vec3b>(y, x)[0]]++;
-				histograma[1][img.at<Vec3b>(y, x)[1]]++;
-				histograma[2][img.at<Vec3b>(y, x)[2]]++;
+	void createHistogramHSV(Mat *img){
+		Mat imgHSV;
+		cvtColor(*img, imgHSV, CV_BGR2HSV);
+		int x;
+		pixelAmount = img->rows*img->cols;
+		int channels = img->channels();
+		int nRows = img->rows;
+		int nCols = img->cols * channels;
+		uchar *p;;
+		for (int y = 0; y < nRows; ++y) {
+			p = img->ptr<uchar>(y);
+			for (x = 0; x < (nCols - 3); x += 3)
+				histograma[p[x]]++;
+		}
+		cdf[0] = histograma[0];
+		for (int i = 1; i < 180; i++)
+			cdf[i] = cdf[i - 1] + histograma[i];
+	}
+	void createHistogram(Mat *img) {
+		int x;
+		pixelAmount = img->rows*img->cols;
+		unsigned char *p = img->data;
+		int channels = img->channels();
+		for (int y = 0; y < img->rows; y++)
+			for (x = 0; x < img->cols; x++)
+				histograma[p[img->step * y + x * channels + 0]]++;
+		cdf[0] = histograma[0];
+		for (int i = 1; i < 256; i++)
+			cdf[i] = cdf[i - 1] + histograma[i];
+	}
+	Mat Equalize(Mat *img, int type, float alpha = 1) {
+		createHistogram(img);
+		switch(type){
+			case EqualizacionNormal:{
+				for (int i = 0; i < 256; i++)
+					newValues[i] = saturate(((float)(cdf[i] - getCDFMin()) / (float)(pixelAmount - 1)) * 255);
+				break;
 			}
+			case EqualizacionSimple:{
+				for (int i = 0; i < 256; i++)
+					newValues[i] = saturate(255 * (cdf[i] / getCDFMaxR()));
+				break;
+			}
+			case EqualizacionUniforme:{
+				for (int i = 0; i < 256; i++)
+					newValues[i] = saturate((getHistoMaxR() - getHistoMin()) * (cdf[i] / getCDFMaxR()) + getHistoMin());
+				break;
+			}
+			case EqualizacionExponencial:{
+				for (int i = 0; i < 256; i++)
+					newValues[i] = saturate(getHistoMin() - (1 / alpha) * log(1 - (cdf[i] / getCDFMaxR())));
+				break;
+			}
+		}
+
+		int channels = img->channels();
+		int nRows = img->rows;
+		int nCols = img->cols * channels;
+		uchar *p;
+		int x, val;
+		for (int y = 0; y < nRows; ++y) {
+			p = img->ptr<uchar>(y);
+			for (x = 0; x < (nCols - 3); x += 3) {
+				val = newValues[(unsigned char)p[x]];
+				p[x]   = val;
+				p[x+1] = val;
+				p[x+2] = val;
+			}
+		}
+		return *img;
+	}
+	void EqualizeVideo(VideoInfo *vid, int type, HWND hWnd){
+		SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_SETPOS, 0, NULL);
+		SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_SETRANGE, NULL, MAKELPARAM(0, vid->fps));
+		for (int i = 0; i < vid->fps; i++) {
+			Equalize(&vid->frames[i].frame, type);
+			SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_STEPIT, NULL, NULL);
+		}
+	}
+	Mat EqualizeColor(Mat *img) {
+		createHistogramHSV(img);
+		int cdfMin = getCDFMin();
+		for (int i = 0; i < 180; i++)
+			newValues[i] = ((float)(cdf[i] - cdfMin) / (float)(pixelAmount - 1)) * 180;
+
+		int channels = img->channels();
+		int nRows = img->rows;
+		int nCols = img->cols * channels;
+		uchar *p;
+		int x, val;
+		for (int y = 0; y < nRows; ++y) {
+			p = img->ptr<uchar>(y);
+			for (x = 0; x < (nCols - 3); x += 3)
+				p[x] = newValues[(unsigned char)p[x]];
+		}
+		Mat imgBGR;
+		cvtColor(*img, imgBGR, CV_HSV2BGR);
+		return imgBGR;
+	}
+	void EqualizeVideoColor(VideoInfo *vid, HWND hWnd) {
+		SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_SETPOS, 0, NULL);
+		SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_SETRANGE, NULL, MAKELPARAM(0, vid->fps));
+		for (int i = 0; i < vid->fps; i++) {
+			EqualizeColor(&vid->frames[i].frame);
+			SendMessage(GetDlgItem(hWnd, PROGRESS_BAR), PBM_STEPIT, NULL, NULL);
 		}
 	}
 };
